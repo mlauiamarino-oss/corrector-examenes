@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CorrectorIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #18120a;
+  --paper: #f7f1e3;
+  --paper2: #efe8d2;
+  --cream: #fdfaf3;
+  --red: #b83232;
+  --green: #2a6040;
+  --gold: #a07820;
+  --gold-light: #c9a84c;
+  --border: #cfc090;
+  --muted: #7a6a48;
+  --shadow: rgba(24,18,10,0.13);
+  --radius: 6px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Serif 4', Georgia, serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='1' fill='%23a07820' fill-opacity='0.08'/%3E%3C/svg%3E");
+}
+
+.header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1.2rem 1rem 1rem;
+  text-align: center;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.header h1 { font-family: var(--font-display); font-size: 1.7rem; font-weight: 900; letter-spacing: -0.01em; line-height: 1; }
+.header h1 em { color: var(--gold-light); font-style: normal; }
+.header p { font-size: 0.78rem; color: #b0a080; margin-top: 0.25rem; font-style: italic; }
+
+.main { padding: 1rem 0.75rem 5rem; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+
+.card { background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 2px 3px 0 var(--shadow); overflow: hidden; }
+.card-head { background: var(--ink); color: var(--paper); padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; }
+.step-badge { background: var(--red); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; font-family: var(--font-body); font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-body { padding: 0.9rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); display: block; margin-bottom: 0.3rem; }
+
+textarea, input[type="text"], input[type="number"] {
+  width: 100%; font-family: var(--font-body); font-size: 0.95rem; color: var(--ink);
+  background: var(--paper); border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.6rem 0.8rem; transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
+}
+textarea { min-height: 120px; resize: vertical; line-height: 1.65; }
+textarea::placeholder, input::placeholder { color: #b0985e; font-style: italic; }
+textarea:focus, input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(160,120,32,0.18); }
+
+.consignas-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.consigna-row { display: flex; gap: 0.5rem; align-items: flex-start; background: var(--paper2); border: 1px solid var(--border); border-radius: 4px; padding: 0.6rem; }
+.consigna-main { flex: 1; display: flex; flex-direction: column; gap: 0.35rem; }
+.consigna-row textarea { min-height: 70px; background: var(--cream); }
+.consigna-score-wrap { display: flex; flex-direction: column; gap: 0.3rem; align-items: center; min-width: 68px; }
+.consigna-score-wrap label { text-align: center; font-size: 0.7rem; }
+.consigna-score-wrap input[type="number"] { width: 68px; text-align: center; font-size: 1rem; font-weight: 600; padding: 0.5rem 0.3rem; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.75rem 1rem; border-radius: 4px; font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: filter 0.15s, transform 0.1s; -webkit-appearance: none; text-decoration: none; min-height: 48px; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; pointer-events: none; }
+.btn-dark   { background: var(--ink);   color: var(--paper); }
+.btn-red    { background: var(--red);   color: white; }
+.btn-green  { background: var(--green); color: white; }
+.btn-gold   { background: var(--gold);  color: white; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+.btn-sm { padding: 0.5rem 0.75rem; font-size: 0.82rem; min-height: 40px; }
+.btn-full { width: 100%; }
+
+.btn-dashed { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.75rem; border: 2px dashed var(--border); border-radius: 4px; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 0.88rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; min-height: 48px; }
+.btn-dashed:hover { border-color: var(--gold); color: var(--ink); }
+
+.student-card { background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 0.75rem; box-shadow: 1px 2px 0 var(--shadow); }
+.student-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; background: var(--paper2); border-bottom: 1px solid var(--border); }
+.student-head input[type="text"] { flex: 1; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; border: none; background: transparent; padding: 0.25rem 0; border-bottom: 1px dashed var(--border); border-radius: 0; }
+.student-head input:focus { border-bottom-color: var(--gold); box-shadow: none; }
+.student-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.65rem; }
+
+.photo-section { display: flex; flex-direction: column; gap: 0.5rem; }
+.photo-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+.thumb-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.thumb-item { position: relative; width: 72px; height: 72px; border-radius: 4px; overflow: visible; }
+.thumb-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 4px; border: 2px solid var(--border); display: block; }
+.thumb-del { position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; background: var(--red); color: white; border: none; border-radius: 50%; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; line-height: 1; }
+.photo-count { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+
+.result-box { display: none; border-left: 3px solid var(--gold); background: #fffdf0; border-radius: 0 4px 4px 0; padding: 0.85rem 0.9rem; font-size: 0.88rem; line-height: 1.75; animation: fadeUp 0.3s ease; white-space: pre-wrap; word-break: break-word; }
+.result-box.show { display: block; }
+.result-box .r-score { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid #d4c898; padding-bottom: 0.5rem; margin-bottom: 0.65rem; }
+.result-box .r-ok  { color: var(--green); }
+.result-box .r-err { color: var(--red); }
+.badge { display: inline-block; border-radius: 3px; padding: 0.05rem 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.badge-ok  { background: var(--green); color: white; }
+.badge-par { background: var(--gold);  color: white; }
+.badge-err { background: var(--red);   color: white; }
+
+.export-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.35); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+.row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+.tip { font-size: 0.8rem; color: #3a5a30; background: rgba(42,96,64,0.08); border-left: 3px solid var(--green); border-radius: 0 4px 4px 0; padding: 0.55rem 0.8rem; line-height: 1.6; }
+
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--ink); padding: 0.75rem 1rem; display: flex; gap: 0.6rem; z-index: 50; box-shadow: 0 -2px 10px var(--shadow); }
+.bottom-bar .btn { flex: 1; }
+
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 0.55rem 1.1rem; border-radius: 20px; font-size: 0.85rem; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 200; white-space: nowrap; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Corrector<em>IA</em></h1>
+  <p>Corrección inteligente de exámenes con inteligencia artificial</p>
+</header>
+
+<main class="main">
+
+  <!-- PASO 1 -->
+  <div class="card">
+    <div class="card-head"><span class="step-badge">1</span> Consignas del examen</div>
+    <div class="card-body">
+      <div class="tip">Escribí cada pregunta con su respuesta correcta esperada y asignale un puntaje.</div>
+      <div class="consignas-list" id="consignasList"></div>
+      <button class="btn-dashed" onclick="addConsigna()">＋ Agregar pregunta</button>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="card">
+    <div class="card-head"><span class="step-badge">2</span> Exámenes de los alumnos</div>
+    <div class="card-body">
+      <div class="tip">Usá el botón <strong>Cámara</strong> para fotografiar el examen o <strong>Galería</strong> para elegir fotos guardadas. Podés agregar varias fotos por alumno/a.</div>
+      <div id="studentsList"></div>
+      <button class="btn-dashed" onclick="addStudent()">＋ Agregar alumno/a</button>
+    </div>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="card" id="exportCard" style="display:none">
+    <div class="card-head"><span class="step-badge">3</span> Exportar correcciones</div>
+    <div class="card-body">
+      <div class="export-row">
+        <button class="btn btn-green btn-sm" onclick="exportTXT()">📄 Descargar .TXT</button>
+        <button class="btn btn-red btn-sm" onclick="exportPDF()">🖨 Imprimir / PDF</button>
+      </div>
+      <div class="tip">El archivo .TXT se puede abrir en cualquier editor o app de notas. Para PDF, elegí "Guardar como PDF" en el menú de impresión.</div>
+    </div>
+  </div>
+
+</main>
+
+<div class="bottom-bar">
+  <button class="btn btn-red" id="btnAll" onclick="corregirTodos()">✦ Corregir todos</button>
+  <button class="btn btn-outline btn-sm" onclick="resetAll()" style="flex:0 0 auto;padding:0 1rem">↺ Reiniciar</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───
+let consignas = [], students = [];
+let cCtr = 0, sCtr = 0;
+
+// ─── CONSIGNAS ───
+function addConsigna(texto='', puntaje=1) {
+  consignas.push({ id: ++cCtr, texto, puntaje });
+  renderConsignas();
+}
+function removeConsigna(id) {
+  consignas = consignas.filter(c => c.id !== id);
+  renderConsignas();
+}
+function renderConsignas() {
+  const el = document.getElementById('consignasList');
+  el.innerHTML = '';
+  consignas.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'consigna-row';
+    d.innerHTML = `
+      <div class="consigna-main">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.2rem">
+          <span style="font-size:0.75rem;font-weight:700;color:var(--muted)">Pregunta ${i+1}</span>
+          <button class="btn btn-outline btn-sm" style="padding:0.15rem 0.45rem;min-height:26px;font-size:0.75rem" onclick="removeConsigna(${c.id})">✕</button>
+        </div>
+        <textarea placeholder="Pregunta y respuesta correcta esperada…" oninput="syncConsigna(${c.id},'texto',this.value)">${esc(c.texto)}</textarea>
+      </div>
+      <div class="consigna-score-wrap">
+        <label>Puntos</label>
+        <input type="number" min="0" max="999" step="0.5" value="${c.puntaje}"
+          oninput="syncConsigna(${c.id},'puntaje',parseFloat(this.value)||0)">
+      </div>`;
+    el.appendChild(d);
+  });
+}
+function syncConsigna(id, field, val) {
+  const c = consignas.find(x => x.id === id);
+  if (c) c[field] = val;
+}
+
+// ─── STUDENTS ───
+function addStudent(name='') {
+  const id = ++sCtr;
+  students.push({ id, name: name || `Alumno/a ${id}`, images: [], result: '' });
+  renderStudents();
+}
+function removeStudent(id) {
+  students = students.filter(s => s.id !== id);
+  renderStudents();
+}
+function renderStudents() {
+  const el = document.getElementById('studentsList');
+  el.innerHTML = '';
+  students.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'student-card';
+    d.id = `sc-${s.id}`;
+    d.innerHTML = `
+      <div class="student-head">
+        <input type="text" value="${esc(s.name)}" placeholder="Nombre"
+          oninput="students.find(x=>x.id===${s.id}).name=this.value||'Alumno/a ${s.id}'">
+        <button class="btn btn-outline btn-sm" style="padding:0.3rem 0.55rem;min-height:36px" onclick="removeStudent(${s.id})">✕</button>
+      </div>
+      <div class="student-body">
+        <div class="photo-section">
+          <label>Fotos del examen</label>
+          <div class="photo-buttons">
+            <button class="btn btn-dark btn-sm" onclick="openCamera(${s.id})">📷 Cámara</button>
+            <button class="btn btn-outline btn-sm" onclick="openGallery(${s.id})">🖼 Galería</button>
+          </div>
+          <div class="thumb-grid" id="thumbs-${s.id}"></div>
+          <div class="photo-count" id="pc-${s.id}"></div>
+        </div>
+        <div class="row">
+          <button class="btn btn-gold btn-sm" id="b1-${s.id}" onclick="corregirUno(${s.id})">Corregir este examen</button>
+          <button class="btn btn-outline btn-sm" id="bex-${s.id}" style="display:none" onclick="exportOne(${s.id})">⬇ Exportar</button>
+        </div>
+        <div class="result-box" id="res-${s.id}"></div>
+      </div>`;
+    el.appendChild(d);
+    renderThumbs(s.id);
+  });
+  buildFileInputs();
+}
+
+// ─── FILE INPUTS (Android-safe) ───
+// We create fresh <input> elements per student.
+// Camera: single file + capture="environment"
+// Gallery: multiple files, NO capture attribute
+function buildFileInputs() {
+  // Remove old inputs
+  document.querySelectorAll('.dynInput').forEach(e => e.remove());
+  students.forEach(s => {
+    // Camera
+    const cam = document.createElement('input');
+    cam.type = 'file'; cam.accept = 'image/*'; cam.capture = 'environment';
+    cam.className = 'dynInput'; cam.style.display = 'none';
+    cam.id = `cam${s.id}`;
+    cam.addEventListener('change', function() { handleFiles(s.id, this); });
+    document.body.appendChild(cam);
+    // Gallery
+    const gal = document.createElement('input');
+    gal.type = 'file'; gal.accept = 'image/*'; gal.multiple = true;
+    gal.className = 'dynInput'; gal.style.display = 'none';
+    gal.id = `gal${s.id}`;
+    gal.addEventListener('change', function() { handleFiles(s.id, this); });
+    document.body.appendChild(gal);
+  });
+}
+
+function openCamera(id) {
+  const el = document.getElementById(`cam${id}`);
+  if (el) { el.value = ''; el.click(); }
+}
+function openGallery(id) {
+  const el = document.getElementById(`gal${id}`);
+  if (el) { el.value = ''; el.click(); }
+}
+
+async function handleFiles(id, inputEl) {
+  const files = Array.from(inputEl.files);
+  if (!files.length) return;
+  showToast(`Procesando ${files.length} imagen(es)…`);
+  const s = students.find(x => x.id === id);
+  if (!s) return;
+  for (const f of files) {
+    try {
+      const encoded = await resizeEncode(f, 1400, 0.82);
+      s.images.push(encoded);
+    } catch(e) { showToast('Error al cargar imagen'); }
+  }
+  renderThumbs(id);
+  inputEl.value = '';
+}
+
+function resizeEncode(file, maxPx, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Lectura fallida'));
+    reader.onload = ev => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Imagen inválida'));
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxPx || h > maxPx) {
+          if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else        { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve({ b64: dataUrl.split(',')[1], type: 'image/jpeg' });
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderThumbs(id) {
+  const s = students.find(x => x.id === id);
+  const grid = document.getElementById(`thumbs-${id}`);
+  const cnt  = document.getElementById(`pc-${id}`);
+  if (!s || !grid) return;
+  grid.innerHTML = '';
+  s.images.forEach((img, i) => {
+    const w = document.createElement('div');
+    w.className = 'thumb-item';
+    w.innerHTML = `<img src="data:${img.type};base64,${img.b64}" alt="p${i+1}" loading="lazy">
+      <button class="thumb-del" onclick="removeImg(${id},${i})">✕</button>`;
+    grid.appendChild(w);
+  });
+  if (cnt) cnt.textContent = s.images.length ? `${s.images.length} foto(s) cargada(s)` : '';
+}
+function removeImg(id, i) {
+  const s = students.find(x => x.id === id);
+  if (s) { s.images.splice(i, 1); renderThumbs(id); }
+}
+
+// ─── CORRECTION ───
+function consignasText() {
+  const total = consignas.reduce((a, c) => a + (parseFloat(c.puntaje)||0), 0);
+  return consignas.map((c,i)=>`Pregunta ${i+1} [${c.puntaje} punto(s)]: ${c.texto}`).join('\n\n')
+    + `\n\nPuntaje total posible: ${total} punto(s)`;
+}
+
+async function callAPI(s) {
+  const ct = consignasText();
+  const total = consignas.reduce((a,c)=>a+(parseFloat(c.puntaje)||0),0);
+  const content = [];
+  s.images.forEach(img => content.push({ type:'image', source:{ type:'base64', media_type:img.type, data:img.b64 } }));
+  content.push({ type:'text', text:`Sos una profesora experimentada que corrige exámenes de historia para nivel secundario y universitario en Argentina.
+
+Vas a corregir el examen de: ${s.name}
+
+Consignas del examen:
+---
+${ct}
+---
+
+Las imágenes son las hojas del examen. Leélas con atención.
+
+Para cada pregunta, indicá:
+- Estado: CORRECTA / PARCIALMENTE CORRECTA / INCORRECTA
+- Puntos obtenidos de los posibles
+- Aciertos (✓) y errores o lo que faltó (✗)
+
+Al final, calculá el puntaje total y la nota en escala 1 a 10, y escribí una devolución general breve (2-4 oraciones), constructiva y alentadora.
+
+Usá exactamente este formato:
+
+PUNTAJE: X / ${total}
+CALIFICACIÓN: X / 10
+
+--- CORRECCIÓN POR PREGUNTA ---
+
+Pregunta 1 [X / Y puntos]: [CORRECTA / PARCIALMENTE CORRECTA / INCORRECTA]
+✓ Aciertos: …
+✗ Errores / lo que faltó: …
+
+--- DEVOLUCIÓN GENERAL ---
+…
+
+Si algo es ilegible, indicálo. Tono: profesional, claro y amable.` });
+
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content}] })
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error?.message||`Error ${r.status}`); }
+  const data = await r.json();
+  return data.content.map(b=>b.text||'').join('');
+}
+
+function validate(s) {
+  if (!consignas.length || consignas.every(c=>!c.texto.trim())) { showToast('Completá las consignas primero'); return false; }
+  if (!s.images.length) { showToast(`${s.name} no tiene fotos`); return false; }
+  return true;
+}
+
+async function corregirUno(id) {
+  const s = students.find(x=>x.id===id);
+  if (!s || !validate(s)) return;
+  setBtnLoading(id, true);
+  const res = document.getElementById(`res-${id}`);
+  res.classList.remove('show'); res.innerHTML = ''; s.result = '';
+  try {
+    s.result = await callAPI(s);
+    res.innerHTML = formatResult(s.result);
+    res.classList.add('show');
+    document.getElementById(`bex-${id}`).style.display = '';
+    checkExport();
+    res.scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(e) {
+    res.innerHTML = `<span style="color:var(--red)">⚠ ${esc(e.message)}</span>`;
+    res.classList.add('show');
+  }
+  setBtnLoading(id, false);
+}
+
+async function corregirTodos() {
+  if (!consignas.length) { showToast('Agregá consignas primero'); return; }
+  const lista = students.filter(s=>s.images.length>0);
+  if (!lista.length) { showToast('Ningún alumno/a tiene fotos'); return; }
+  const btn = document.getElementById('btnAll');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Corrigiendo…';
+  for (let i=0; i<lista.length; i++) {
+    const s = lista[i];
+    showToast(`${s.name} (${i+1}/${lista.length})…`);
+    setBtnLoading(s.id, true);
+    const res = document.getElementById(`res-${s.id}`);
+    res.classList.remove('show'); s.result = '';
+    try {
+      s.result = await callAPI(s);
+      res.innerHTML = formatResult(s.result);
+      res.classList.add('show');
+      document.getElementById(`bex-${s.id}`).style.display = '';
+    } catch(e) {
+      res.innerHTML = `<span style="color:var(--red)">⚠ ${esc(e.message)}</span>`;
+      res.classList.add('show');
+    }
+    setBtnLoading(s.id, false);
+  }
+  checkExport();
+  btn.disabled = false; btn.innerHTML = '✦ Corregir todos';
+  showToast(`✓ ${lista.length} examen(es) corregido(s)`);
+}
+
+function setBtnLoading(id, on) {
+  const b = document.getElementById(`b1-${id}`);
+  if (!b) return;
+  b.disabled = on;
+  b.innerHTML = on ? '<span class="spinner"></span> Corrigiendo…' : 'Corregir este examen';
+}
+
+// ─── FORMAT ───
+function formatResult(text) {
+  let h = esc(text);
+  h = h.replace(/(PUNTAJE:\s*[\d.,]+ \/ [\d.,]+)/g, '<div class="r-score">$1</div>');
+  h = h.replace(/(CALIFICACI[ÓO]N:\s*[\d.,]+ \/ 10)/g, '<div class="r-score">$1</div>');
+  h = h.replace(/\[CORRECTA\]/g, '<span class="badge badge-ok">✓ Correcta</span>');
+  h = h.replace(/\[PARCIALMENTE CORRECTA\]/g, '<span class="badge badge-par">⚠ Parcial</span>');
+  h = h.replace(/\[INCORRECTA\]/g, '<span class="badge badge-err">✗ Incorrecta</span>');
+  h = h.replace(/(--- [^\n]+ ---)/g, '<strong style="color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:.06em">$1</strong>');
+  h = h.replace(/(✓[^\n]*)/g, '<span class="r-ok">$1</span>');
+  h = h.replace(/(✗[^\n]*)/g, '<span class="r-err">$1</span>');
+  return h;
+}
+
+// ─── EXPORT ───
+function checkExport() {
+  document.getElementById('exportCard').style.display = students.some(s=>s.result) ? '' : 'none';
+}
+
+function buildTXT() {
+  const lines = ['CORRECCIONES — CorrectorIA', '='.repeat(50),
+    'Fecha: ' + new Date().toLocaleDateString('es-AR'), ''];
+  lines.push('CONSIGNAS:');
+  consignas.forEach((c,i) => lines.push(`  ${i+1}. [${c.puntaje} pt] ${c.texto}`));
+  lines.push('', '='.repeat(50));
+  students.filter(s=>s.result).forEach(s => {
+    lines.push('', `ALUMNO/A: ${s.name}`, '-'.repeat(40), s.result, '', '='.repeat(50));
+  });
+  return lines.join('\n');
+}
+
+function exportTXT() {
+  const blob = new Blob([buildTXT()], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `correcciones_${dSlug()}.txt`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  showToast('Archivo descargado');
+}
+
+function exportPDF() {
+  const w = window.open('','_blank');
+  const cHtml = consignas.map((c,i)=>`<li><strong>[${c.puntaje} pt]</strong> ${esc(c.texto)}</li>`).join('');
+  const sHtml = students.filter(s=>s.result).map(s=>`
+    <section style="margin-top:1.5rem">
+      <h2 style="font-size:1rem;border-bottom:2px solid #333;padding-bottom:4px">${esc(s.name)}</h2>
+      <pre style="font-size:0.82rem;line-height:1.7;white-space:pre-wrap;word-break:break-word">${esc(s.result)}</pre>
+    </section>`).join('<hr style="margin:1rem 0">');
+  w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>Correcciones</title>
+<style>body{font-family:Georgia,serif;font-size:13px;color:#111;max-width:700px;margin:1.5rem auto;line-height:1.6}h1{font-size:1.4rem;border-bottom:3px solid #111;padding-bottom:6px}@media print{@page{margin:1.5cm}}</style>
+</head><body>
+<h1>Correcciones de Exámenes</h1>
+<p><em>${new Date().toLocaleDateString('es-AR')}</em></p>
+<h2 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:.05em;color:#555">Consignas</h2>
+<ol>${cHtml}</ol>
+<hr>${sHtml}</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(), 400);
+}
+
+function exportOne(id) {
+  const s = students.find(x=>x.id===id);
+  if (!s||!s.result) return;
+  const text = `CORRECCIÓN — ${s.name}\n${'='.repeat(40)}\nFecha: ${new Date().toLocaleDateString('es-AR')}\n\n${s.result}`;
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${slug(s.name)}_${dSlug()}.txt`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  showToast('Corrección exportada');
+}
+
+// ─── UTILS ───
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+function dSlug(){ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
+
+let toastT = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function resetAll() {
+  if (!confirm('¿Reiniciar todo?')) return;
+  document.querySelectorAll('.dynInput').forEach(e=>e.remove());
+  consignas=[]; students=[]; cCtr=0; sCtr=0;
+  document.getElementById('exportCard').style.display='none';
+  renderConsignas(); renderStudents();
+  addConsigna('',2); addConsigna('',2);
+  addStudent(''); addStudent('');
+}
+
+// ─── INIT ───
+addConsigna('', 2);
+addConsigna('', 2);
+addStudent('');
+addStudent('');
+</script>
+</body>
+</html>
